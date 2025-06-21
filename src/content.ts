@@ -1,6 +1,8 @@
 // Vimium-D Content Script (TypeScript)
 // Hier implementieren Sie die Tastaturnavigation
 
+import { Scroll } from "./scroll";
+
 console.log('Vimium-D Content Script geladen');
 
 // const state: ExtensionState = {
@@ -9,30 +11,6 @@ console.log('Vimium-D Content Script geladen');
 //   currentHintInput: ''
 // };
 
-class Scroll {
-    smoothScrollBy(top: number, duration: number = 300) {
-        const currentScroll = window.scrollY;
-        const targetScroll = currentScroll + top;
-        const startTime = performance.now();
-        
-        function animate(currentTime: number) {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            
-            // Easing-Funktion für sanftere Bewegung
-            const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-            
-            const currentPosition = currentScroll + (targetScroll - currentScroll) * easeOutCubic;
-            window.scrollTo(0, currentPosition);
-            
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            }
-        }
-        
-        requestAnimationFrame(animate);
-    }
-}
 
 document.addEventListener('keydown', function(event: KeyboardEvent): void {
   handleKeyPress(event.key);
