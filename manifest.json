@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Vimium-D",
+  "version": "1.0.0",
+  "description": "Eine Vimium-ähnliche Chrome-Extension",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+} 

@@ -1,0 +1,47 @@
+{
+  "name": "vimium-d",
+  "version": "1.0.0",
+  "description": "Eine Vimium-ähnliche Chrome-Extension für effiziente Tastaturnavigation",
+  "main": "background.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "echo 'Tests ausführen'",
+    "lint": "eslint src/**/*.ts",
+    "package": "npm run build && zip -r vimium-d.zip dist/ -x '*.git*' 'node_modules/*' '*.DS_Store'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "vimium",
+    "keyboard-navigation",
+    "browser-extension",
+    "vim",
+    "productivity",
+    "typescript"
+  ],
+  "author": "Dennis Barzanoff",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dennisbarzanoff/vimium-d.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dennisbarzanoff/vimium-d/issues"
+  },
+  "homepage": "https://github.com/dennisbarzanoff/vimium-d#readme",
+  "devDependencies": {
+    "@types/chrome": "^0.0.254",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "Chrome >= 88"
+  ]
+} 
