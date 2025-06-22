@@ -1,27 +1,39 @@
 export class Scroll {
-    smoothScrollBy(top: number) {
-        // animation
-        // for this animation we need to go from current scroll to target scroll in easy out
-        const currentScroll = window.scrollY;
-        const start = performance.now();
-        console.log(start);
-        const duration = 100;
-        function animate(currentTime: number) {
-            const elapsed = currentTime - start;
-            console.log(elapsed);
-            const progress = Math.min(elapsed / duration, 1);
-            console.log(progress);
-            const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-            console.log(easeOutCubic);
-            console.log('----------------------------')
-            window.scrollTo({
-                top: currentScroll + top * easeOutCubic,
-                behavior: 'smooth'
-            });
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            }
+    // Konfigurations-Konstanten
+    private static readonly MIN_DURATION = 100;
+    private static readonly MAX_DURATION = 800;
+    private static readonly DURATION_SCALE = 100;
+
+    isEnabled = false;
+    direction = 0;
+    
+    smoothScrollEnable(direction: number) {
+        this.direction = direction;
+        if (this.isEnabled) {
+            return;
         }
+        
+        this.isEnabled = true;
+        const animate = (currentTime: number) => {
+            const currentScroll = window.scrollY;
+            const targetScroll = currentScroll + this.direction;
+            
+            if (!this.isEnabled) {
+                return;
+            }
+            
+            window.scrollTo({
+                top: targetScroll,
+                behavior: 'instant'
+            });
+            
+            requestAnimationFrame(animate);
+        };
+        
         requestAnimationFrame(animate);
+    }
+
+    smoothScrollDisable() {
+        this.isEnabled = false;
     }
 }

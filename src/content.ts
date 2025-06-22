@@ -11,17 +11,26 @@ console.log('Vimium-D Content Script geladen');
 //   currentHintInput: ''
 // };
 
+let scroll: Scroll = new Scroll();
 
 document.addEventListener('keydown', function(event: KeyboardEvent): void {
   handleKeyPress(event.key);
 });
 
+document.addEventListener('keyup', function(event: KeyboardEvent): void {
+    handleKeyUp(event.key);
+});
+
+
+function handleKeyUp(key: string): void {
+    scroll.smoothScrollDisable();
+}
+
 function handleKeyPress(key: string): void {
-    const scroll = new Scroll();
     console.log('Taste gedrückt:', key);
     if (key === 'j') {
-        scroll.smoothScrollBy(30); // Kleinere Schritte für sanfteres Scrollen
+        scroll.smoothScrollEnable(30);
     } else if (key === 'k') {
-        scroll.smoothScrollBy(-30);
+        scroll.smoothScrollEnable(-30);
     } 
 }
