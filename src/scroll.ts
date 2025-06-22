@@ -1,12 +1,19 @@
 export class Scroll {
-    // Konfigurations-Konstanten
-    private static readonly MIN_DURATION = 100;
-    private static readonly MAX_DURATION = 800;
-    private static readonly DURATION_SCALE = 100;
-
-    isEnabled = false;
-    direction = 0;
+    private isEnabled = false;
+    private direction = 0;
     
+    /**
+     * Smooth scroll to the direction
+     * @param direction - The direction to scroll to
+     * 
+     * The way this works is by continuously scrolling in small increments
+     * using requestAnimationFrame for smooth animation. When enabled,
+     * it will keep scrolling in the specified direction until disabled.
+     * 
+     * This is so that the scroll doesn't get interrupted by calling the function again.
+     * If the user releases the key, they should call smoothScrollDisable() to stop the scroll.
+     * 
+     */
     smoothScrollEnable(direction: number) {
         this.direction = direction;
         if (this.isEnabled) {
