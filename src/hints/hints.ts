@@ -1,3 +1,5 @@
+import { HintGenerator } from "./generate_hint_name";
+
 interface Hint {
     referredElement: HTMLElement;
     hintElement: HTMLElement;
@@ -5,6 +7,7 @@ interface Hint {
 
 export class Hints {
     private hints: Hint[] = [];
+    private hintAssigner = new HintGenerator();
 
     showHints() {
         const shadowDiv = document.createElement('div');
@@ -39,6 +42,17 @@ export class Hints {
             container.style.pointerEvents = 'none';
             
             shadowDiv.shadowRoot?.appendChild(container);
+
+            const innerSpan = document.createElement('span');
+            if (element instanceof HTMLElement) {
+                innerSpan.textContent = this.hintAssigner.assignHint(element);
+            }
+            innerSpan.style.position = 'absolute';
+            innerSpan.style.top = `${rect.top}px`;
+            innerSpan.style.left = `${rect.left}px`;
+            innerSpan.style.backgroundColor = 'red';
+            innerSpan.style.opacity = '1';
+            shadowDiv.shadowRoot?.appendChild(innerSpan);
             
             this.hints.push({ referredElement: element as HTMLElement, hintElement: container });
         });
@@ -51,6 +65,7 @@ export class Hints {
             shadowDiv.remove();
         }
         this.hints = [];
+        this.hintAssigner.clearHints();
     }
 
     private isElementVisible(element: HTMLElement): boolean {
