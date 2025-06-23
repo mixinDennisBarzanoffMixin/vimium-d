@@ -38,28 +38,33 @@ function handleKeyPress(key: string): void {
     } else if (key === 'Escape') {
         console.log('hide hints');
         hints.hideHints();
-    }
+        console.log(document.activeElement);
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+    } 
 }
 
 
 
 // const observability = new Observability(() => {
-//     hints.updateHints();
+//     hints.hideHints();
 // });
 
 let isTyping = false;
 
-document.addEventListener('focusin', (event) => {
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-        isTyping = true;
+function initialIsFocused() {
+    const focused = document.activeElement;
+    if (focused instanceof HTMLInputElement || focused instanceof HTMLTextAreaElement) {
+        return true;
     }
-});
+    return false;
+}
 
-document.addEventListener('focusout', (event) => {
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-        isTyping = false;
-    }
-});
+if (initialIsFocused()) {
+    isTyping = true;
+}
+
 
 document.addEventListener('keypress', function(event: KeyboardEvent): void {
     if (isTyping) return;
@@ -68,4 +73,50 @@ document.addEventListener('keypress', function(event: KeyboardEvent): void {
         console.log('show hints');
         hints.showHints();
     } 
+});
+
+// we track focus in and out on every form element
+// cuz we don't wanna trigger shortcuts when we are typing
+const focusInEventHandler = ((event: Event) => {
+    isTyping = true;
+}) as EventListener;
+
+const focusOutEventHandler = ((event: Event) => {
+    isTyping = false;
+}) as EventListener;
+
+function attachFormListeners() {
+    const formElements = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea');
+    console.log('formElements attaching');
+    formElements.forEach(element => {
+        element.addEventListener('focusin', focusInEventHandler);
+        element.addEventListener('focusout', focusOutEventHandler);
+    });
+}
+
+function removeFormListeners() {
+    const formElements = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea');
+    console.log('formElements removing');
+    formElements.forEach(element => {
+        element.removeEventListener('focusin', focusInEventHandler); 
+        element.removeEventListener('focusout', focusOutEventHandler); 
+    });
+}
+
+// Initial attachment
+attachFormListeners();
+
+// Watch for new form elements being added
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length) {
+            removeFormListeners();
+            attachFormListeners();
+        }
+    });
+});
+
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
 });

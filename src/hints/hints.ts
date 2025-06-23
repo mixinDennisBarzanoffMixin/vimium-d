@@ -6,14 +6,6 @@ interface Hint {
 export class Hints {
     private hints: Hint[] = [];
 
-    updateHints() {
-        this.hints.forEach(hint => {
-            const rect = hint.referredElement.getBoundingClientRect();
-            hint.hintElement.style.top = `${rect.top}px`;
-            hint.hintElement.style.left = `${rect.left}px`;
-        });
-    }
-
     showHints() {
         const shadowDiv = document.createElement('div');
         shadowDiv.id = 'hints-vimium-d';
