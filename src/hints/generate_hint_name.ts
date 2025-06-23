@@ -32,8 +32,9 @@ export class HintGenerator {
         let hint = '';
         let letterIndex = 0;
         
+        const startingPosition = hash % this.hintMap.size;
         // If all single letters are taken, start combining letters
-        letterIndex = 0;
+        letterIndex = startingPosition;
         while (true) {
             for (let secondIndex = 0; secondIndex < this.availableLetters.length; secondIndex++) {
                 hint = this.availableLetters[letterIndex] + this.availableLetters[secondIndex];
