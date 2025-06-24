@@ -4,15 +4,14 @@ interface HintEntry {
 }
 
 export class HintGenerator {
-    private availableLetters: string[];
     private takenHints: Set<string>;
     private hintMap: Map<number, HintEntry[]>;
-    
+    private validShortcuts: string[];
     constructor() {
         // Generate letters from a-z
-        this.availableLetters = "abcdeghilmnopqrstuvwxyz".split('');
         this.takenHints = new Set();
         this.hintMap = new Map();
+        this.validShortcuts = this.generateValidShortcutMap();
     }
 
     private hashElement(element: HTMLElement): number {
@@ -28,26 +27,42 @@ export class HintGenerator {
         return Math.abs(hash);
     }
 
-    private generateNextAvailableHint(hash: number): string {
-        let hint = '';
-        let letterIndex = 0;
-        
-        const startingPosition = hash % this.hintMap.size;
-        // If all single letters are taken, start combining letters
-        letterIndex = startingPosition;
-        while (true) {
-            for (let secondIndex = 0; secondIndex < this.availableLetters.length; secondIndex++) {
-                hint = this.availableLetters[letterIndex] + this.availableLetters[secondIndex];
-                if (!this.takenHints.has(hint)) {
-                    return hint;
-                }
-            }
-            letterIndex++;
-            // In theory we could go forever, but in practice this should be enough
-            if (letterIndex >= this.availableLetters.length) {
-                throw new Error('Ran out of possible hints!');
+    private generateValidShortcutMap(): string[] {
+        const availableLettersLeftHand = "qwertasdfgzxcvb".split('');
+        const availableLettersRightHand = "mnlkjhpoiuy".split('');
+        const validShortcuts: string[] = [];
+        // Left hand + Right hand combinations
+        for (let i = 0; i < availableLettersLeftHand.length; i++) {
+            for (let j = 0; j < availableLettersRightHand.length; j++) {
+                validShortcuts.push(availableLettersLeftHand[i] + availableLettersRightHand[j]);
             }
         }
+
+        // Right hand + Left hand combinations 
+        for (let i = 0; i < availableLettersRightHand.length; i++) {
+            for (let j = 0; j < availableLettersLeftHand.length; j++) {
+                validShortcuts.push(availableLettersRightHand[i] + availableLettersLeftHand[j]);
+            }
+        }
+        return validShortcuts;
+    }
+
+    private generateNextAvailableHint(hash: number): string {
+        // Calculate starting position based on hash
+        const totalCombinations = this.validShortcuts.length;
+        const startingPosition = hash % totalCombinations;
+        
+        // Try all possible combinations starting from hash position
+        for (let i = 0; i < totalCombinations; i++) {
+            const position = (startingPosition + i) % totalCombinations;
+            const hint = this.validShortcuts[position];
+            
+            if (!this.takenHints.has(hint)) {
+                return hint;
+            }
+        }
+        
+        throw new Error('Ran out of possible hints!');
     }
 
     assignHint(element: HTMLElement): string {
