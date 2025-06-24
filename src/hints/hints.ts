@@ -5,7 +5,14 @@ interface Hint {
     hintElement: HTMLElement;
 }
 
-export class Hints {
+export interface IGetElementByHint {
+    getElementByHint(key: string): HTMLElement | null
+}
+
+export class HintsManager implements IGetElementByHint {
+    getElementByHint(key: string): HTMLElement | null {
+        return this.hintAssigner.getElementByHint(key);
+    }
     private hints: Hint[] = [];
     private hintAssigner = new HintGenerator();
 

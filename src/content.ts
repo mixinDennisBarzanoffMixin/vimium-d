@@ -1,7 +1,8 @@
 // Vimium-D Content Script (TypeScript)
 // Hier implementieren Sie die Tastaturnavigation
 
-import { Hints } from "./hints/hints";
+import { HintsManager } from "./hints/hints";
+import { KeyPress } from "./hints/keypress";
 import { Observability } from "./hints/observability";
 import { Scroll } from "./scroll";
 
@@ -27,22 +28,28 @@ document.addEventListener('keyup', function(event: KeyboardEvent): void {
 function handleKeyUp(key: string): void {
     scroll.smoothScrollDisable();
 }
-const hints = new Hints();
+const hintManager = new HintsManager();
+const keyPress = new KeyPress(hintManager);
 
 function handleKeyPress(key: string): void {
     console.log('Taste gedrückt:', key);
+    const clickedElement = keyPress.detectElementPressed(key);
+    if (clickedElement) {
+        clickedElement.click();
+        hintManager.hideHints();
+    }
     if (key === 'j') {
         scroll.smoothScrollEnable(30);
     } else if (key === 'k') {
         scroll.smoothScrollEnable(-30);
     } else if (key === 'Escape') {
         console.log('hide hints');
-        hints.hideHints();
+        hintManager.hideHints();
         console.log(document.activeElement);
         if (document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
         }
-    } 
+    }
 }
 
 
@@ -71,7 +78,7 @@ document.addEventListener('keypress', function(event: KeyboardEvent): void {
     
     if (event.key === 'f') {
         console.log('show hints');
-        hints.showHints();
+        hintManager.showHints();
     } 
 });
 

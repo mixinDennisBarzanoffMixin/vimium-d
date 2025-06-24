@@ -81,7 +81,8 @@ export class HintGenerator {
     getElementByHint(hint: string): HTMLElement | null {
         // Search through all entries
         for (const entries of this.hintMap.values()) {
-            const entry = entries.find(e => e.hint === hint);
+            console.log('searching for hint', hint)
+            const entry = entries.find(e => e.hint.toUpperCase() === hint.toUpperCase());
             if (entry) {
                 return entry.element;
             }
