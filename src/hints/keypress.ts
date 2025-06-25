@@ -1,6 +1,6 @@
 // keypressing logic and buffering
 
-import { IGetElementByHint } from "./hints";
+import { HintEntry, IGetElementByHint } from "./generate_hint_name";
 
 
 export class KeyPress {
@@ -11,7 +11,7 @@ export class KeyPress {
         this.keyPressed = keyPressed;
     }
     
-    detectElementPressed(key: string): HTMLElement | null {
+    detectElementsPressed(key: string): HintEntry[] {
         this.keypresses.push(key);
         // that's how big we want the buffer to be
         if (this.keypresses.length > 2) {
@@ -19,7 +19,8 @@ export class KeyPress {
         }
         // last two letters pressed
         console.log('last two letters pressed', this.keypresses.join(''))
-        const selectedElement = this.keyPressed.getElementByHint(this.keypresses.join(''))
-        return selectedElement;
+        const selectedElements = this.keyPressed.getElementsByHint(this.keypresses.join(''))
+        console.log('selectedElements', selectedElements)
+        return selectedElements;
     }
 }

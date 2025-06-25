@@ -1,15 +1,17 @@
-interface HintEntry {
+export interface HintEntry {
     hint: string;
     element: HTMLElement;
 }
 
-export class HintGenerator {
-    private takenHints: Set<string>;
-    private hintMap: Map<number, HintEntry[]>;
+export interface IGetElementByHint {
+    getElementsByHint(key: string): HintEntry[]
+}
+
+export class HintGenerator implements IGetElementByHint {
+    private hintMap: Map<string, HintEntry[]>;
     private validShortcuts: string[];
     constructor() {
         // Generate letters from a-z
-        this.takenHints = new Set();
         this.hintMap = new Map();
         this.validShortcuts = this.generateValidShortcutMap();
     }
@@ -17,9 +19,21 @@ export class HintGenerator {
     private hashElement(element: HTMLElement): number {
         // Hash based on position and tag name for uniqueness
         let str = `${element.tagName}`;
-        for (const attr of element.attributes) {
+        const attributesToConsider = Array.from(element.attributes)
+            .filter(attr => {
+                return attr.name.includes('aria-') || attr.name.includes('data-') || attr.name.includes('role');
+            });
+        for (const attr of attributesToConsider) {
+            // if (attr.name.includes('data-')) {
+            //     // don't include the data- attribute if aria label exists
+            //     if (attributesToConsider.some(attr => attr.name.includes('aria-'))) {
+            //         console.log('for element', element, 'skipping data- attribute because aria tag exists', attr.name, attr.value)
+            //         continue;
+            //     }
+            // }
             str += `-${attr.name}=${attr.value}`;
         }
+        str += `-${element.id}`;
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
             hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -52,46 +66,36 @@ export class HintGenerator {
         const totalCombinations = this.validShortcuts.length;
         const startingPosition = hash % totalCombinations;
         
-        // Try all possible combinations starting from hash position
-        for (let i = 0; i < totalCombinations; i++) {
-            const position = (startingPosition + i) % totalCombinations;
-            const hint = this.validShortcuts[position];
-            
-            if (!this.takenHints.has(hint)) {
-                return hint;
-            }
-        }
+        const position = startingPosition % totalCombinations;
+        const hint = this.validShortcuts[position];
         
-        throw new Error('Ran out of possible hints!');
+        return hint;
     }
 
-    assignHint(element: HTMLElement): string {
+    retrieveHint(element: HTMLElement): string {
         const hash = this.hashElement(element);
         const hint = this.generateNextAvailableHint(hash);
         
         // Store the hint
-        const entries = this.hintMap.get(hash) || [];
+        const entries = this.hintMap.get(hint) || [];
+        if (entries.length > 0) {
+            console.log('collision detected', hint, entries[0].hint)
+        }
         entries.push({ hint, element });
-        this.hintMap.set(hash, entries);
-        this.takenHints.add(hint);
+        console.log('setting hint', hint, entries)
+        this.hintMap.set(hint, entries);
         
         return hint.toUpperCase();
     }
 
-    getElementByHint(hint: string): HTMLElement | null {
+    getElementsByHint(hint: string): HintEntry[] {
         // Search through all entries
-        for (const entries of this.hintMap.values()) {
-            console.log('searching for hint', hint)
-            const entry = entries.find(e => e.hint.toUpperCase() === hint.toUpperCase());
-            if (entry) {
-                return entry.element;
-            }
-        }
-        return null;
+        const entries = this.hintMap.get(hint) || [];
+        console.log('entries for hint', hint, entries)
+        return entries;
     }
 
     clearHints(): void {
-        this.takenHints.clear();
         this.hintMap.clear();
     }
 }

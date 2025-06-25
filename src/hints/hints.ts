@@ -1,25 +1,26 @@
-import { HintGenerator } from "./generate_hint_name";
+import { HintEntry, HintGenerator } from "./generate_hint_name";
 
-interface Hint {
+export interface Hint {
     referredElement: HTMLElement;
     hintElement: HTMLElement;
+
+    show(): void;
 }
 
-export interface IGetElementByHint {
-    getElementByHint(key: string): HTMLElement | null
-}
+export class HintDisplayer {
+    private hintAssigner: HintGenerator;
 
-export class HintsManager implements IGetElementByHint {
-    getElementByHint(key: string): HTMLElement | null {
-        return this.hintAssigner.getElementByHint(key);
+    constructor(hintAssigner: HintGenerator) {
+        this.hintAssigner = hintAssigner;
     }
-    private hints: Hint[] = [];
-    private hintAssigner = new HintGenerator();
 
-    showHints() {
-        const shadowDiv = document.createElement('div');
+    createShadowRootIfNotExists() {
+        let shadowDiv = document.getElementById('hints-vimium-d');
+        if (shadowDiv) {
+            return;
+        }
+        shadowDiv = document.createElement('div');
         shadowDiv.id = 'hints-vimium-d';
-        shadowDiv.attachShadow({ mode: 'open' });
         shadowDiv.style.position = 'fixed';
         shadowDiv.style.top = '0';
         shadowDiv.style.left = '0';
@@ -28,7 +29,41 @@ export class HintsManager implements IGetElementByHint {
         shadowDiv.style.zIndex = '2147483647';
         shadowDiv.style.pointerEvents = 'none';
         document.body.appendChild(shadowDiv);
-        console.log(shadowDiv);
+        shadowDiv.attachShadow({ mode: 'open' });
+    }
+
+    showSingleHint(hint: HintEntry) {
+        this.createShadowRootIfNotExists();
+        const element = hint.element;
+        const shadowDiv = document.getElementById('hints-vimium-d')!;
+        const rect = element.getBoundingClientRect();
+        
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.top = `${rect.top}px`;
+        container.style.left = `${rect.left}px`;
+        container.style.width = `${rect.width}px`;
+        container.style.height = `${rect.height}px`;
+        container.style.backgroundColor = 'yellow';
+        container.style.opacity = '0.4';
+        container.style.pointerEvents = 'none';
+        
+        shadowDiv.shadowRoot?.appendChild(container);
+
+        const innerSpan = document.createElement('span');
+        if (element instanceof HTMLElement) {
+            innerSpan.textContent = hint.hint;
+        }
+        innerSpan.style.position = 'absolute';
+        innerSpan.style.top = `${rect.top}px`;
+        innerSpan.style.left = `${rect.left}px`;
+        innerSpan.style.backgroundColor = 'red';
+        innerSpan.style.opacity = '1';
+        shadowDiv.shadowRoot?.appendChild(innerSpan);
+    }
+
+    showHints() {
+        this.createShadowRootIfNotExists();
 
         const allClickableElements = document.querySelectorAll('a, button, input, textarea, select, option, optgroup');
         console.log(allClickableElements);
@@ -36,32 +71,11 @@ export class HintsManager implements IGetElementByHint {
             if (!this.isElementVisible(element as HTMLElement)) {
                 return;
             }
-            const rect = element.getBoundingClientRect();
-            
-            const container = document.createElement('div');
-            container.style.position = 'absolute';
-            container.style.top = `${rect.top}px`;
-            container.style.left = `${rect.left}px`;
-            container.style.width = `${rect.width}px`;
-            container.style.height = `${rect.height}px`;
-            container.style.backgroundColor = 'yellow';
-            container.style.opacity = '0.4';
-            container.style.pointerEvents = 'none';
-            
-            shadowDiv.shadowRoot?.appendChild(container);
-
-            const innerSpan = document.createElement('span');
-            if (element instanceof HTMLElement) {
-                innerSpan.textContent = this.hintAssigner.assignHint(element);
-            }
-            innerSpan.style.position = 'absolute';
-            innerSpan.style.top = `${rect.top}px`;
-            innerSpan.style.left = `${rect.left}px`;
-            innerSpan.style.backgroundColor = 'red';
-            innerSpan.style.opacity = '1';
-            shadowDiv.shadowRoot?.appendChild(innerSpan);
-            
-            this.hints.push({ referredElement: element as HTMLElement, hintElement: container });
+            const hint = this.hintAssigner.retrieveHint(element as HTMLElement);
+            this.showSingleHint({
+                element: element as HTMLElement,
+                hint: hint
+            });
         });
     }
 
@@ -71,7 +85,6 @@ export class HintsManager implements IGetElementByHint {
         if (shadowDiv) {
             shadowDiv.remove();
         }
-        this.hints = [];
         this.hintAssigner.clearHints();
     }
 

@@ -13,7 +13,7 @@ describe('HintGenerator', () => {
         element.href = 'https://example.com';
         document.body.appendChild(element);
 
-        const hint = hintGenerator.assignHint(element);
+        const hint = hintGenerator.retrieveHint(element);
         expect(hint).toBe('AA');
     });
 }); 
